@@ -2,7 +2,7 @@
 
 import css from "./AuthNavigation.module.css";
 import { useAuthStore } from "@/lib/store/authStore";
-import { logout } from "@/lib/api";
+import { logout } from "@/lib/api/api";
 import { useRouter } from "next/navigation";
 
 export default function AuthNavigation() {

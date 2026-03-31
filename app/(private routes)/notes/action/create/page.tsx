@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createNote } from "@/lib/api";
+import { createNote } from "@/lib/api/api";
 import type { Tag } from "@/types/note";
 
 export default function CreateNotePage() {

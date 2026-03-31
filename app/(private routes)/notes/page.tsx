@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchNotes } from "@/lib/api"; // <-- исправлено
+import { fetchNotes } from "@/lib/api/api"; // <-- исправлено
 import NotesList from "../../../components/NoteList/NoteList";
 import type { Note } from "@/types/note";
 

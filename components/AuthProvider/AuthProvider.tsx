@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { checkSession } from "@/lib/api";
+import { checkSession } from "@/lib/api/api";
 import { useAuthStore } from "@/lib/store/authStore";
 
 export default function AuthProvider({

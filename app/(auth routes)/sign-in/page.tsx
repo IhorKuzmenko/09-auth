@@ -1,7 +1,7 @@
 "use client";
 
 import css from "./SignInPage.module.css";
-import { login } from "@/lib/api"; // <- правильно!
+import { login } from "@/lib/api/api"; // <- правильно!
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useState } from "react";
