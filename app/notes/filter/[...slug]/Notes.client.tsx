@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { useQuery } from "@tanstack/react-query";
+import { fetchNotes, FetchNotesResponse } from "@/lib/api";
+import NoteList from "@/components/NoteList/NoteList";
+import SearchBox from "@/components/SearchBox/SearchBox";
+import { Pagination } from "@/components/Pagination/Pagination";
+import Link from "next/link";
+import css from "./Notes.module.css";
+
+interface NotesClientProps {
+  tag?: string;
+}
+
+export default function NotesClient({ tag }: NotesClientProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const perPage = 12;
+
+  const debounced = useDebouncedCallback((value: string) => {
+    setDebouncedSearch(value);
+    setCurrentPage(1);
+  }, 500);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    debounced(value);
+  };
+
+  const { data, isLoading, isFetching, error } = useQuery<
+    FetchNotesResponse,
+    Error
+  >({
+    queryKey: ["notes", currentPage, debouncedSearch, tag],
+    queryFn: () => fetchNotes(currentPage, perPage, debouncedSearch, tag),
+    staleTime: 60_000,
+  });
+
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 0;
+
+  return (
+    <div className={css.app}>
+      <header className={css.toolbar}>
+        <SearchBox value={search} onChange={handleSearchChange} />
+
+        {totalPages > 1 && (
+          <Pagination
+            pageCount={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        )}
+
+        <Link href="/notes/action/create" className={css.button}>
+          Create note +
+        </Link>
+      </header>
+
+      {isLoading && <p>Loading...</p>}
+      {isFetching && <p>Page update...</p>}
+
+      {notes.length > 0 && <NoteList notes={notes} />}
+
+      {notes.length === 0 && !isLoading && !error && (
+        <p>No notes found for this filter</p>
+      )}
+
+      {error && <p>Error loading notes: {error.message}</p>}
+    </div>
+  );
+}

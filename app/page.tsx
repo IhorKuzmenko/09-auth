@@ -1,54 +1,23 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/store/authStore";
+import css from "./page.module.css"
 
 export default function Home() {
-  const router = useRouter();
-  const { user } = useAuthStore();
-
-  useEffect(() => {
-    if (user) {
-      router.push("/profile");
-    }
-  }, [user, router]);
-
   return (
-    <main style={{ textAlign: "center", padding: "4rem" }}>
-      <h1 style={{ fontSize: "2rem", marginBottom: "2rem" }}>
-        Welcome to My App
-      </h1>
+    <main>
+  <div className={css.container}>
+    <h1 className={css.title}>Welcome to NoteHub</h1>
+    <p className={css.description}>
+      NoteHub is a simple and efficient application designed for managing
+      personal notes. It helps keep your thoughts organized and accessible
+      in one place, whether you are at home or on the go.
+    </p>
+    <p className={css.description}>
+      The app provides a clean interface for writing, editing, and browsing
+      notes. With support for keyword search and structured organization,
+      NoteHub offers a streamlined experience for anyone who values clarity
+      and productivity.
+    </p>
+  </div>
+</main>
 
-      {!user && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
-          <a
-            href="/sign-in"
-            style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "#0070f3",
-              color: "#fff",
-              borderRadius: "5px",
-              textDecoration: "none",
-            }}
-          >
-            Sign in
-          </a>
-
-          <a
-            href="/sign-up"
-            style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "#eaeaea",
-              color: "#000",
-              borderRadius: "5px",
-              textDecoration: "none",
-            }}
-          >
-            Sign up
-          </a>
-        </div>
-      )}
-    </main>
   );
 }

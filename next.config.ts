@@ -1,12 +1,8 @@
-const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "ac.goit.global",
-      },
-    ],
-  },
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  reactCompiler: true,
 };
 
 export default nextConfig;
