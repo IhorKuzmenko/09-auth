@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { checkSession } from "@/lib/api/api";
+import { checkSession } from "@/lib/api/serverApi"; // перевірка сесії
+import { getMe } from "@/lib/api/clientApi"; // отримання даних користувача
 import { useAuthStore } from "@/lib/store/authStore";
 
 export default function AuthProvider({
@@ -13,24 +14,24 @@ export default function AuthProvider({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const initAuth = async () => {
       try {
-        const res = await checkSession();
+        // Перевіряємо сесію
+        await checkSession();
 
-        if (res.data) {
-          setUser(res.data);
-        } else {
-          clearIsAuthenticated();
-        }
+        // Якщо сесія валідна, отримуємо дані користувача
+        const user = await getMe();
+        setUser(user);
       } catch {
+        // Якщо помилка — очищаємо стан авторизації
         clearIsAuthenticated();
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSession();
-  }, [setUser, clearIsAuthenticated]); 
+    initAuth();
+  }, [setUser, clearIsAuthenticated]);
 
   if (loading) return <p>Loading...</p>;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import css from "./SignInPage.module.css";
-import { login } from "@/lib/api/api"; // <- правильно!
+import { login, getMe } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useState } from "react";
@@ -22,11 +22,20 @@ export default function SignIn() {
     const password = formData.get("password") as string;
 
     try {
-      const res = await login({ email, password });
-      setUser(res.data);
+      // Виконуємо автентифікацію
+      await login({ email, password });
+
+      // Отримуємо дані користувача
+      const user = await getMe();
+
+      // Зберігаємо користувача у глобальному сторі
+      setUser(user);
+
+      // Перенаправляємо на профіль
       router.push("/profile");
-    } catch {
-      setError("Login error");
+    } catch (err) {
+      console.error(err);
+      setError("Login error. Please check your credentials.");
     }
   };
 
@@ -35,12 +44,23 @@ export default function SignIn() {
       <form className={css.form} onSubmit={handleSubmit}>
         <h1 className={css.formTitle}>Sign in</h1>
 
-        <input name="email" className={css.input} required />
-        <input name="password" type="password" className={css.input} required />
+        <div className={css.formGroup}>
+          <label>Email</label>
+          <input name="email" type="email" className={css.input} required />
+        </div>
 
-        <button className={css.submitButton}>Log in</button>
+        <div className={css.formGroup}>
+          <label>Password</label>
+          <input name="password" type="password" className={css.input} required />
+        </div>
 
-        <p className={css.error}>{error}</p>
+        <div className={css.actions}>
+          <button type="submit" className={css.submitButton}>
+            Log in
+          </button>
+        </div>
+
+        {error && <p className={css.error}>{error}</p>}
       </form>
     </main>
   );

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNotes, FetchNotesResponse } from "@/lib/api";
+import { fetchNotes, FetchNotesResponse } from "@/lib/api/api"; 
 import NoteList from "@/components/NoteList/NoteList";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import { Pagination } from "@/components/Pagination/Pagination";
@@ -31,17 +31,17 @@ export default function NotesClient({ tag }: NotesClientProps) {
     debounced(value);
   };
 
-  const { data, isLoading, isFetching, error } = useQuery<
-    FetchNotesResponse,
-    Error
-  >({
-    queryKey: ["notes", currentPage, debouncedSearch, tag],
-    queryFn: () => fetchNotes(currentPage, perPage, debouncedSearch, tag),
+  // ✅ useQuery v5: queryKey readonly, без keepPreviousData
+  const query = useQuery<FetchNotesResponse, Error>({
+    queryKey: ["notes", currentPage, debouncedSearch, tag] as const,
+    queryFn: async () =>
+      await fetchNotes(currentPage, perPage, debouncedSearch, tag),
     staleTime: 60_000,
   });
 
-  const notes = data?.notes ?? [];
-  const totalPages = data?.totalPages ?? 0;
+  const notes = query.data?.notes ?? [];
+  const totalPages = query.data?.totalPages ?? 0;
+  const { isLoading, isFetching, error } = query;
 
   return (
     <div className={css.app}>
@@ -61,8 +61,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
         </Link>
       </header>
 
-      {isLoading && <p>Loading...</p>}
-      {isFetching && <p>Page update...</p>}
+      {(isLoading || isFetching) && (
+        <p className={css.loading}>
+          {isLoading ? "Loading notes..." : "Updating page..."}
+        </p>
+      )}
 
       {notes.length > 0 && <NoteList notes={notes} />}
 
@@ -70,7 +73,7 @@ export default function NotesClient({ tag }: NotesClientProps) {
         <p>No notes found for this filter</p>
       )}
 
-      {error && <p>Error loading notes: {error.message}</p>}
+      {error && <p className={css.error}>Error loading notes: {error.message}</p>}
     </div>
   );
 }

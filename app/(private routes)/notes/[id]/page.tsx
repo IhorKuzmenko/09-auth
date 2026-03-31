@@ -4,24 +4,21 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { fetchNoteById } from "@/lib/api/api";
-import NotePreview from "@/app/@modal/(.)notes/[id]/NotePreview.client";
+import { getNoteById } from "@/lib/api/serverApi"; // ✅ правильна функція
+import NotePreview from "@/app/@modal/(.)notes/[id]/NotePreview.client"; // ✅ правильний шлях
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
 
   try {
-    const note = await fetchNoteById(id);
+    const note = await getNoteById(id); // ✅ замість fetchNoteById
 
     const title = `NoteHub - ${note.title}`;
-    const description =
-      note.content?.slice(0, 100) || "Перегляд нотатки в NoteHub";
+    const description = note.content?.slice(0, 100) || "Перегляд нотатки в NoteHub";
 
     return {
       title,
@@ -72,7 +69,7 @@ export default async function Page({ params }: PageProps) {
 
   await queryClient.prefetchQuery({
     queryKey: ["note", id],
-    queryFn: () => fetchNoteById(id),
+    queryFn: () => getNoteById(id), // ✅ замість fetchNoteById
   });
 
   const dehydratedState = dehydrate(queryClient);

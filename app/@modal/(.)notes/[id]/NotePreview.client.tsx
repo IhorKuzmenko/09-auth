@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, HydrationBoundary, DehydratedState } from "@tanstack/react-query";
-import { fetchNoteById } from "@/lib/api";
+import { fetchNoteById } from "@/lib/api/clientApi"; // ✅ виправлений шлях
 import css from "./NotePreview.module.css";
 import type { Note } from "@/types/note";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ function ModalWrapper({ noteId, onClose }: { noteId: string; onClose: () => void
   const { data, isLoading, error } = useQuery<Note, Error>({
     queryKey: ["note", noteId],
     queryFn: () => fetchNoteById(noteId),
-    enabled: !!noteId, 
+    enabled: !!noteId,
     refetchOnMount: false,
   });
 

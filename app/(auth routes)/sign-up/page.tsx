@@ -1,7 +1,8 @@
 "use client";
 
 import css from "./SignUpPage.module.css";
-import { register } from "@/lib/api/api";
+// Імпортуємо register з clientApi, а не з api
+import { register } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useState } from "react";
@@ -12,23 +13,23 @@ export default function SignUp() {
   const { setUser } = useAuthStore();
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+  const form = e.currentTarget;
+  const formData = new FormData(form);
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-    try {
-      const res = await register({ email, password });
-      setUser(res.data);
-      router.push("/profile");
-    } catch {
-      setError("Registration error");
-    }
-  };
+  try {
+    const user = await register({ email, password }); // user вже User
+    setUser(user);
+    router.push("/profile");
+  } catch {
+    setError("Registration error");
+  }
+};
 
   return (
     <main className={css.mainContent}>

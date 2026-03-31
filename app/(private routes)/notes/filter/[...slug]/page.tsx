@@ -1,5 +1,6 @@
+// app/(private routes)/notes/filter/[...slug]/page.tsx
 import type { Metadata } from "next";
-import { fetchNotes } from "@/lib/api/api";
+import { fetchNotes } from "@/lib/api/serverApi"; // ✅ правильний модуль
 import NotesClient from "./Notes.client";
 import {
   QueryClient,
@@ -53,7 +54,7 @@ export default async function FilteredNotesPage({
 
   await queryClient.prefetchQuery({
     queryKey: ["notes", 1, "", finalTag],
-    queryFn: () => fetchNotes(1, 12, "", finalTag),
+    queryFn: () => fetchNotes(1, 12, "", finalTag), // ✅ server-side fetch
   });
 
   return (
