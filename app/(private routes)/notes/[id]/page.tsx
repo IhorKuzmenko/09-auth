@@ -1,32 +1,85 @@
-"use client";
+import type { Metadata } from "next";
+import {
+  QueryClient,
+  dehydrate,
+  HydrationBoundary,
+} from "@tanstack/react-query";
+import { fetchNoteById } from "@/lib/api";
+import NotePreview from "@/app/@modal/(.)notes/[id]/NotePreview.client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { getNoteById } from "@/lib/api/clientApi";
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
+interface PageProps {
+  params: Promise<{ id: string }>;
 }
 
-export default function NoteDetailPage() {
-  const { id } = useParams();
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id } = await params;
 
-  const { data: noteResponse, isLoading } = useQuery<{ data: Note }>({
+  try {
+    const note = await fetchNoteById(id);
+
+    const title = `NoteHub - ${note.title}`;
+    const description =
+      note.content?.slice(0, 100) || "Перегляд нотатки в NoteHub";
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `https://08-zustand-orpin-two.vercel.app/notes/${id}`,
+        images: [
+          {
+            url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+            width: 1200,
+            height: 630,
+            alt: note.title,
+          },
+        ],
+      },
+    };
+  } catch {
+    return {
+      title: "NoteHub - Нотатку не знайдено",
+      description: "Цю нотатку не вдалося знайти або вона була видалена.",
+      openGraph: {
+        title: "NoteHub - Нотатку не знайдено",
+        description: "Цю нотатку не вдалося знайти або вона була видалена.",
+        url: `http://localhost:3000/notes/${id}`,
+        images: [
+          {
+            url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+            width: 1200,
+            height: 630,
+            alt: "Note not found",
+          },
+        ],
+      },
+    };
+  }
+}
+
+export default async function Page({ params }: PageProps) {
+  const { id } = await params;
+
+  if (!id) {
+    return <p>Note ID not found</p>;
+  }
+
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
     queryKey: ["note", id],
-    queryFn: () => getNoteById(id as string),
+    queryFn: () => fetchNoteById(id),
   });
 
-  const note = noteResponse?.data;
-
-  if (isLoading) return <p>Loading...</p>;
-  if (!note) return <p>Note not found</p>;
+  const dehydratedState = dehydrate(queryClient);
 
   return (
-    <div>
-      <h1>{note.title}</h1>
-      <p>{note.content}</p>
-    </div>
+    <HydrationBoundary state={dehydratedState}>
+      <NotePreview noteId={id} />
+    </HydrationBoundary>
   );
 }
