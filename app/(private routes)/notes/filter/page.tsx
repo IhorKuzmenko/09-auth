@@ -2,25 +2,18 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getNotes } from "@/lib/api/clientApi";
-import type { AxiosResponse } from "axios";
-
-type Note = {
-  id: string;
-  title: string;
-  content: string;
-};
+import { fetchNotes } from "@/lib/api";
+import type { Note } from "@/types/note";
 
 export default function FilterNotesPage() {
   const [filter, setFilter] = useState("");
 
-  const { data: notesResponse } = useQuery<AxiosResponse<{ data: Note[] }>, Error>({
+  const { data: notesResponse, isLoading, error } = useQuery<{ notes: Note[]; totalPages: number }, Error>({
     queryKey: ["notes", filter],
-    queryFn: () => getNotes(filter),
+    queryFn: () => fetchNotes(1, 50, filter), // например page=1, perPage=50
   });
 
-  // достаем реальные данные
-  const notes = notesResponse?.data.data;
+  const notes = notesResponse?.notes;
 
   return (
     <div>
@@ -29,6 +22,10 @@ export default function FilterNotesPage() {
         onChange={(e) => setFilter(e.target.value)}
         placeholder="Filter notes"
       />
+
+      {isLoading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
+
       <ul>
         {notes?.map((note) => (
           <li key={note.id}>{note.title}</li>

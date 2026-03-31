@@ -1,24 +1,28 @@
 
-import { api } from "./api";
+import axios from "axios";
+import type { Note } from "../../types/note";
 
-export const register = (data: { email: string; password: string }) =>
-  api.post("/auth/register", data);
+const BASE_URL = "https://notehub-public.goit.study/api";
+const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
 
-export const login = (data: { email: string; password: string }) =>
-  api.post("/auth/login", data);
+export const publicApi = axios.create({
+  baseURL: BASE_URL,
+  headers: { Authorization: `Bearer ${token}` },
+});
 
-export const logout = () => api.post("/auth/logout");
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
 
-export const checkSession = () => api.get("/auth/session");
+export const fetchNotes = async (page: number, perPage: number, search = "", tag?: string) => {
+  const response = await publicApi.get<FetchNotesResponse>("/notes", {
+    params: { page, perPage, search, tag },
+  });
+  return response.data;
+};
 
-export const getMe = () => api.get("/users/me");
-
-export const updateMe = (data: { username: string }) =>
-  api.patch("/users/me", data);
-
-
-export const createNote = (data: { title: string; content: string }) =>
-    api.post("/notes", data);
-
-export const getNotes = (filter?: string) =>
-  api.get("/notes", { params: { filter } });
+export const fetchNoteById = async (id: string): Promise<Note> => {
+  const response = await publicApi.get<Note>(`/notes/${id}`);
+  return response.data;
+};
