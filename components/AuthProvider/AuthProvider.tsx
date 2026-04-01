@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { checkSession } from "@/lib/api/serverApi"; // перевірка сесії
-import { getMe } from "@/lib/api/clientApi"; // отримання даних користувача
+import { checkSession, getMe } from "@/lib/api/clientApi"; // ✅ FIX
 import { useAuthStore } from "@/lib/store/authStore";
 
 export default function AuthProvider({
@@ -16,14 +15,13 @@ export default function AuthProvider({
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Перевіряємо сесію
+        // Перевірка сесії
         await checkSession();
 
-        // Якщо сесія валідна, отримуємо дані користувача
+        // Отримання користувача
         const user = await getMe();
         setUser(user);
       } catch {
-        // Якщо помилка — очищаємо стан авторизації
         clearIsAuthenticated();
       } finally {
         setLoading(false);

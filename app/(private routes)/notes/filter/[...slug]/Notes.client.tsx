@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNotes, FetchNotesResponse } from "@/lib/api/api"; 
+import { fetchNotesClient, FetchNotesResponse } from "@/lib/api/clientApi"; 
 import NoteList from "@/components/NoteList/NoteList";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import { Pagination } from "@/components/Pagination/Pagination";
@@ -31,11 +31,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
     debounced(value);
   };
 
-  // ✅ useQuery v5: queryKey readonly, без keepPreviousData
+  // useQuery v5: queryKey readonly
   const query = useQuery<FetchNotesResponse, Error>({
     queryKey: ["notes", currentPage, debouncedSearch, tag] as const,
     queryFn: async () =>
-      await fetchNotes(currentPage, perPage, debouncedSearch, tag),
+      await fetchNotesClient(currentPage, perPage, debouncedSearch, tag),
     staleTime: 60_000,
   });
 
