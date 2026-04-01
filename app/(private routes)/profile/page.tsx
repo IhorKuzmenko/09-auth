@@ -1,23 +1,21 @@
-// app/(private routes)/profile/page.tsx
-import css from "./ProfilePage.module.css";
-import Image from "next/image";
-import Link from "next/link";
-import { getMe } from "@/lib/api/serverApi";
-import type { Metadata } from "next";
+import css from './ProfilePage.module.css';
+import Image from 'next/image';
+import Link from 'next/link';
+import { getMe } from '@/lib/api/serverApi';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Profile Page",
-  description: "User profile page displaying user information",
+  title: 'NoteHub - Profile',
+  description: 'User profile page',
 };
 
 export default async function Profile() {
-  const user = await getMe(); // serverApi повертає User
+  const user = await getMe();
 
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>
         <h1 className={css.formTitle}>Profile Page</h1>
-
         {user.avatar && (
           <Image
             src={user.avatar}
@@ -27,10 +25,8 @@ export default async function Profile() {
             className={css.avatar}
           />
         )}
-
         <p>Username: {user.username}</p>
         <p>Email: {user.email}</p>
-
         <Link href="/profile/edit" className={css.editLink}>
           Edit Profile
         </Link>

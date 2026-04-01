@@ -3,3 +3,8 @@ export interface User {
   username: string;
   avatar: string;
 }
+
+export interface UpdateUserRequest {
+  username?: string;
+  avatar?: string;
+}

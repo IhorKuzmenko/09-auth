@@ -1,51 +1,62 @@
-// lib/api/clientApi.ts
-import { api } from "./api";
-import type { Note } from "../../types/note";
-import type { User } from "../../types/user";
+import { api } from './api';
+import type { Note, CreateNoteRequest } from '@/types/note';
+import type { User, UpdateUserRequest } from '@/types/user';
 
-// Тип ответа для списка нот
 export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
 
-// ------------------------------
-// Notes
+// ====================== NOTES ======================
 export const fetchNotesClient = async (
   page: number,
   perPage: number,
-  search = "",
+  search = '',
   tag?: string
 ): Promise<FetchNotesResponse> => {
-  const response = await api.get("/notes", {
+  const res = await api.get<FetchNotesResponse>('/notes', {
     params: { page, perPage, search, tag },
   });
-  return response.data;
+  return res.data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const response = await api.get(`/notes/${id}`);
-  return response.data;
+  const res = await api.get<Note>(`/notes/${id}`);
+  return res.data;
 };
 
-// ------------------------------
-// Auth
+export const createNote = async (data: CreateNoteRequest): Promise<Note> => {
+  const res = await api.post<Note>('/notes', data);
+  return res.data;
+};
+
+// ====================== AUTH ======================
 export const login = async (data: { email: string; password: string }) => {
-  const response = await api.post("/auth/login", data);
-  return response.data;
+  const res = await api.post('/auth/login', data);
+  return res.data;
 };
 
 export const register = async (data: { email: string; password: string }) => {
-  const response = await api.post("/auth/register", data);
-  return response.data;
+  const res = await api.post('/auth/register', data);
+  return res.data;
+};
+
+export const logout = async () => {
+  await api.post('/auth/logout');
 };
 
 export const checkSession = async () => {
-  const response = await api.get("/auth/session");
-  return response.data;
+  const res = await api.get('/auth/session');
+  return res.data;
 };
 
+// ====================== USERS ======================
 export const getMe = async (): Promise<User> => {
-  const response = await api.get("/users/me");
-  return response.data;
+  const res = await api.get<User>('/users/me');
+  return res.data;
+};
+
+export const updateProfile = async (data: UpdateUserRequest): Promise<User> => {
+  const res = await api.patch<User>('/users/me', data);
+  return res.data;
 };

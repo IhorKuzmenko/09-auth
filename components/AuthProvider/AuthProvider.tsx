@@ -1,24 +1,16 @@
 "use client";
+import { useEffect, useState } from 'react';
+import { checkSession, getMe } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 
-import { useEffect, useState } from "react";
-import { checkSession, getMe } from "@/lib/api/clientApi"; // ✅ FIX
-import { useAuthStore } from "@/lib/store/authStore";
-
-export default function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, clearIsAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Перевірка сесії
         await checkSession();
-
-        // Отримання користувача
         const user = await getMe();
         setUser(user);
       } catch {
@@ -27,7 +19,6 @@ export default function AuthProvider({
         setLoading(false);
       }
     };
-
     initAuth();
   }, [setUser, clearIsAuthenticated]);
 

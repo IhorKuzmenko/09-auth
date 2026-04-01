@@ -1,53 +1,42 @@
+// proxy.ts  (в корені проєкту)
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { refreshSession } from "@/lib/api/serverApi";
-import { cookies } from "next/headers";
+import { getMe } from "@/lib/api/serverApi";
 
 export async function proxy(request: NextRequest) {
-  const cookieStore = await cookies(); 
+  const pathname = request.nextUrl.pathname;
 
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  const isPrivateRoute = 
+    pathname.startsWith("/profile") || 
+    pathname.startsWith("/notes");
 
-  const isAuth =
-    request.nextUrl.pathname.startsWith("/sign-in") ||
-    request.nextUrl.pathname.startsWith("/sign-up");
+  const isAuthRoute = 
+    pathname === "/sign-in" || 
+    pathname === "/sign-up";
 
-  const isPrivate =
-    request.nextUrl.pathname.startsWith("/profile") ||
-    request.nextUrl.pathname.startsWith("/notes");
-
-  
-  if (!accessToken && refreshToken) {
+  // Якщо користувач заходить на приватний маршрут
+  if (isPrivateRoute) {
     try {
-      const tokens = await refreshSession(refreshToken);
-      const response = NextResponse.next();
-
-      response.cookies.set("accessToken", tokens.accessToken, {
-        httpOnly: true,
-        path: "/",
-      });
-
-      response.cookies.set("refreshToken", tokens.refreshToken, {
-        httpOnly: true,
-        path: "/",
-      });
-
-      return response;
+      await getMe();           // перевіряємо чи авторизований через серверний запит
+      return NextResponse.next();
     } catch {
+      // Не авторизований → перенаправляємо на логін
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
   }
 
-  
-  if (!accessToken && isPrivate) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+  // Якщо авторизований користувач заходить на сторінки логіну/реєстрації
+  if (isAuthRoute) {
+    try {
+      await getMe();
+      // Вже авторизований → перенаправляємо на профіль
+      return NextResponse.redirect(new URL("/profile", request.url));
+    } catch {
+      // Не авторизований → дозволяємо зайти
+      return NextResponse.next();
+    }
   }
 
-  
-  if (accessToken && isAuth) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
+  // Для всіх інших сторінок — нічого не робимо
   return NextResponse.next();
 }

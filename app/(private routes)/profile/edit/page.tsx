@@ -1,36 +1,27 @@
-// app/(private routes)/profile/edit/page.tsx
 "use client";
-
-import css from "./EditProfilePage.module.css";
-import Image from "next/image";
-import { updateProfile } from "@/lib/api/clientApi";
-import { useAuthStore } from "@/lib/store/authStore";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import React from "react";
+import css from './EditProfilePage.module.css';
+import Image from 'next/image';
+import { updateProfile } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function EditProfile() {
   const router = useRouter();
   const { user, setUser } = useAuthStore();
-  const [username, setUsername] = useState(user?.username || "");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState(user?.username || '');
+  const [error, setError] = useState('');
 
   if (!user) return <p>Loading...</p>;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // 1. Оновлюємо профіль через clientApi
       const updatedUser = await updateProfile({ username });
-
-      // 2. Зберігаємо оновлені дані у стор
       setUser(updatedUser);
-
-      // 3. Повертаємо на сторінку профілю
-      router.push("/profile");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to update profile. Please try again.");
+      router.push('/profile');
+    } catch {
+      setError('Failed to update profile');
     }
   };
 
@@ -38,7 +29,6 @@ export default function EditProfile() {
     <main className={css.mainContent}>
       <div className={css.profileCard}>
         <h1 className={css.formTitle}>Edit Profile</h1>
-
         {user.avatar && (
           <Image
             src={user.avatar}
@@ -48,7 +38,6 @@ export default function EditProfile() {
             className={css.avatar}
           />
         )}
-
         <form onSubmit={handleSubmit}>
           <div className={css.formGroup}>
             <label>Username</label>
@@ -58,20 +47,17 @@ export default function EditProfile() {
               className={css.input}
             />
           </div>
-
           <div className={css.formGroup}>
             <label>Email</label>
             <input value={user.email} readOnly className={css.input} />
           </div>
-
           {error && <p className={css.error}>{error}</p>}
-
           <div className={css.actions}>
             <button type="submit" className={css.saveButton}>Save</button>
             <button
               type="button"
               className={css.cancelButton}
-              onClick={() => router.push("/profile")}
+              onClick={() => router.push('/profile')}
             >
               Cancel
             </button>
