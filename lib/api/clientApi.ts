@@ -1,6 +1,7 @@
+// lib/api/clientApi.ts
 import { api } from './api';
 import type { Note, CreateNoteRequest } from '@/types/note';
-import type { User, UpdateUserRequest } from '@/types/user';
+import type { User } from '@/types/user';
 
 export interface FetchNotesResponse {
   notes: Note[];
@@ -30,6 +31,11 @@ export const createNote = async (data: CreateNoteRequest): Promise<Note> => {
   return res.data;
 };
 
+export const deleteNote = async (id: string): Promise<Note> => {
+  const res = await api.delete<Note>(`/notes/${id}`);
+  return res.data;
+};
+
 // ====================== AUTH ======================
 export const login = async (data: { email: string; password: string }) => {
   const res = await api.post('/auth/login', data);
@@ -56,7 +62,8 @@ export const getMe = async (): Promise<User> => {
   return res.data;
 };
 
-export const updateProfile = async (data: UpdateUserRequest): Promise<User> => {
+// inline-тип вместо UpdateUserRequest
+export const updateProfile = async (data: { username?: string; avatar?: string }): Promise<User> => {
   const res = await api.patch<User>('/users/me', data);
   return res.data;
 };

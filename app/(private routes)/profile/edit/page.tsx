@@ -42,6 +42,7 @@ export default function EditProfile() {
           <div className={css.formGroup}>
             <label>Username</label>
             <input
+              type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={css.input}
@@ -49,7 +50,12 @@ export default function EditProfile() {
           </div>
           <div className={css.formGroup}>
             <label>Email</label>
-            <input value={user.email} readOnly className={css.input} />
+            <input
+              type="email"
+              value={user.email}
+              readOnly
+              className={css.input}
+            />
           </div>
           {error && <p className={css.error}>{error}</p>}
           <div className={css.actions}>
@@ -57,7 +63,7 @@ export default function EditProfile() {
             <button
               type="button"
               className={css.cancelButton}
-              onClick={() => router.push('/profile')}
+              onClick={() => router.back()}
             >
               Cancel
             </button>

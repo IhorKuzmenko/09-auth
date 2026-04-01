@@ -1,42 +1,67 @@
-// proxy.ts  (в корені проєкту)
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getMe } from "@/lib/api/serverApi";
+import { getMe, refreshSession } from "@/lib/api/serverApi";
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  const isPrivateRoute = 
-    pathname.startsWith("/profile") || 
+  const isPrivateRoute =
+    pathname.startsWith("/profile") ||
     pathname.startsWith("/notes");
 
-  const isAuthRoute = 
-    pathname === "/sign-in" || 
+  const isAuthRoute =
+    pathname === "/sign-in" ||
     pathname === "/sign-up";
 
-  // Якщо користувач заходить на приватний маршрут
-  if (isPrivateRoute) {
-    try {
-      await getMe();           // перевіряємо чи авторизований через серверний запит
-      return NextResponse.next();
-    } catch {
-      // Не авторизований → перенаправляємо на логін
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-  }
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  // Якщо авторизований користувач заходить на сторінки логіну/реєстрації
-  if (isAuthRoute) {
+  let isAuthenticated = false;
+  let response = NextResponse.next();
+
+  // 🔹 1. Перевірка accessToken
+  if (accessToken) {
     try {
       await getMe();
-      // Вже авторизований → перенаправляємо на профіль
-      return NextResponse.redirect(new URL("/profile", request.url));
+      isAuthenticated = true;
     } catch {
-      // Не авторизований → дозволяємо зайти
-      return NextResponse.next();
+      // токен протух — нічого не робимо
     }
   }
 
-  // Для всіх інших сторінок — нічого не робимо
-  return NextResponse.next();
+  // 🔹 2. Пробуємо refresh
+  if (!isAuthenticated && refreshToken) {
+    try {
+      const res = await refreshSession(refreshToken);
+
+      const setCookie = res.headers["set-cookie"];
+
+      if (setCookie) {
+        const cookiesArray = Array.isArray(setCookie)
+          ? setCookie
+          : [setCookie];
+
+        response = NextResponse.next();
+
+        cookiesArray.forEach((cookie) => {
+          response.headers.append("set-cookie", cookie);
+        });
+
+        isAuthenticated = true;
+      }
+    } catch {
+      // refresh не вдався
+    }
+  }
+
+  // 🔹 3. Роутинг
+  if (isPrivateRoute && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (isAuthRoute && isAuthenticated) {
+    return NextResponse.redirect(new URL("/profile", request.url));
+  }
+
+  return response;
 }

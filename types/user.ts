@@ -4,7 +4,3 @@ export interface User {
   avatar: string;
 }
 
-export interface UpdateUserRequest {
-  username?: string;
-  avatar?: string;
-}

@@ -46,3 +46,32 @@ export const getMe = async (): Promise<User> => {
   });
   return res.data;
 };
+
+// ====================== AUTH ======================
+
+export const checkSession = async () => {
+  const cookieHeader = await getCookieHeader();
+
+  const res = await serverApi.get("/auth/session", {
+    headers: {
+      cookie: cookieHeader,
+    },
+  });
+
+  return res;
+};
+
+export const refreshSession = async (refreshToken: string) => {
+  const res = await serverApi.post(
+    "/auth/refresh",
+    {},
+    {
+      headers: {
+        Cookie: `refreshToken=${refreshToken}`,
+      },
+    }
+  );
+
+  return res;
+};
+
