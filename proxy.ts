@@ -19,7 +19,6 @@ export async function proxy(request: NextRequest) {
   let isAuthenticated = false;
   let response = NextResponse.next();
 
-  // 🔹 1. Перевірка accessToken
   if (accessToken) {
     try {
       await getMe();
@@ -29,7 +28,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 🔹 2. Пробуємо refresh
+ 
   if (!isAuthenticated && refreshToken) {
     try {
       const res = await refreshSession(refreshToken);
@@ -54,13 +53,13 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 🔹 3. Роутинг
   if (isPrivateRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
+
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL("/profile", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return response;

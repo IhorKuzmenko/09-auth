@@ -3,11 +3,11 @@ import { fetchNoteById } from "@/lib/api/serverApi";
 import NotePreview from "./NotePreview.client";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>; 
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params; 
 
   if (!id) return <p>Note ID not found</p>;
 
